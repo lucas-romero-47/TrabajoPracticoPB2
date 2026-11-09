@@ -17,4 +17,9 @@ public class Camioneta extends Vehiculo {
 		double minutosExactos = Duration.between(getHoraIngreso(), horaDeSalida).toMinutes();
 		return (minutosExactos / 60.0) * 1000.0 * (1 + recargo / 100);
 	}
+	
+	@Override
+	public int compareTo(Vehiculo vehiculo) {
+		return getPatente().compareTo(vehiculo.getPatente());
+	}
 }

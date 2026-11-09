@@ -6,11 +6,11 @@ public class Casco {
 	private Integer id;
 	private TipoColor color;
 	private String talle;
-	
+
 	public Casco(Integer id, TipoColor color, String talle) {
 		this.id = id;
 		this.color = color;
 		this.talle = talle;
 	}
-	
+
 }

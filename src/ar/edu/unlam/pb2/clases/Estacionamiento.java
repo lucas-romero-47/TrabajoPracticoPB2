@@ -1,5 +1,6 @@
 package ar.edu.unlam.pb2.clases;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -7,6 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 import ar.edu.unlam.pb2.enums.MedioDePagoEnum;
 import ar.edu.unlam.pb2.exceptions.CascoAsignadoException;
@@ -14,6 +16,7 @@ import ar.edu.unlam.pb2.exceptions.CocheraInexistenteException;
 import ar.edu.unlam.pb2.exceptions.CocheraNoEncontradaException;
 import ar.edu.unlam.pb2.exceptions.CocheraOcupadaException;
 import ar.edu.unlam.pb2.exceptions.DebeTenerCascoParaPoderCalcularSuCostoDeSalidaException;
+import ar.edu.unlam.pb2.exceptions.NoHayVehiculosEstacionadosHaceMasDeMediaHoraException;
 import ar.edu.unlam.pb2.exceptions.PatenteDuplicadaException;
 import ar.edu.unlam.pb2.exceptions.VehiculoInvalidoParaAsignarCasco;
 import ar.edu.unlam.pb2.exceptions.VehiculoNoSeEncuentraEnCochera;
@@ -86,9 +89,9 @@ public class Estacionamiento {
 		}
 		throw new CocheraNoEncontradaException();
 	}
-	
+
 	public Map<String, Double> generarReporteDeLaRecaudacion() {
-		Map<String, Double> reporteDeLaRecaudacion = new HashMap <String, Double>();
+		Map<String, Double> reporteDeLaRecaudacion = new HashMap<String, Double>();
 		Double costoAuto = 0.0;
 		Double costoMoto = 0.0;
 		Double costoCamioneta = 0.0;
@@ -109,12 +112,12 @@ public class Estacionamiento {
 		reporteDeLaRecaudacion.put("Cuatriciclo", costoCuatri);
 		return reporteDeLaRecaudacion;
 	}
-	
-	public List<Vehiculo> obtenerVehiculosEstacionadosEntreDosFechas(LocalDateTime fechaDeInicio, LocalDateTime fechaDeFin) {
+
+	public List<Vehiculo> obtenerVehiculosEstacionadosEntreDosFechas(LocalDateTime fechaDeInicio,
+			LocalDateTime fechaDeFin) {
 		List<Vehiculo> vehiculosEncontrados = new ArrayList<Vehiculo>();
 		for (Vehiculo vehiculo : cocheras.values()) {
-			if (fechaDeInicio.isBefore(vehiculo.getHoraIngreso())
-					&& fechaDeFin.isAfter(vehiculo.getHoraIngreso()))
+			if (fechaDeInicio.isBefore(vehiculo.getHoraIngreso()) && fechaDeFin.isAfter(vehiculo.getHoraIngreso()))
 				vehiculosEncontrados.add(vehiculo);
 		}
 		return vehiculosEncontrados;
@@ -137,7 +140,7 @@ public class Estacionamiento {
 	}
 
 	public void validarCocheraOcupada(Integer idCochera) throws CocheraOcupadaException {
-		if (cocheras.containsKey(idCochera)) 
+		if (cocheras.containsKey(idCochera))
 			throw new CocheraOcupadaException();
 	}
 
@@ -158,13 +161,32 @@ public class Estacionamiento {
 
 	private void validarVehiculoEstacionadoEnCochera(Integer idCocheraOrigen, Vehiculo vehiculo)
 			throws VehiculoNoSeEncuentraEnCochera {
-		if (cocheras.get(idCocheraOrigen) != vehiculo) 
+		if (cocheras.get(idCocheraOrigen) != vehiculo)
 			throw new VehiculoNoSeEncuentraEnCochera();
 	}
 
 	private void validarVehiculoNoNulo(Vehiculo vehiculo) throws VehiculoNuloException {
 		if (vehiculo.equals(null))
 			throw new VehiculoNuloException();
+	}
+
+	public TreeSet<Vehiculo> ordenarVehiculosPorPatente() {
+		TreeSet<Vehiculo> vehiculosOrdenadosPorPatente = new TreeSet<Vehiculo>();
+		vehiculosOrdenadosPorPatente.addAll(cocheras.values());
+		return vehiculosOrdenadosPorPatente;
+	}
+
+	public TreeSet<Vehiculo> ordenarVehiculosQueSuperanLaMediaHoraTiempoMayorAMenor() throws NoHayVehiculosEstacionadosHaceMasDeMediaHoraException {
+		TreeSet<Vehiculo> vehiculosOrdenadosQueSuperanLaMediaHoraTiempoMayorAMenor = new TreeSet<Vehiculo>(
+				new OrdenarVehiculosQueSuperanLaMediaHoraTiempoMayorAMenor());
+		for (Vehiculo vehiculo : cocheras.values()) {
+			if (Duration.between(vehiculo.getHoraIngreso(), LocalDateTime.now()).toMinutes() < 30) {
+				throw new NoHayVehiculosEstacionadosHaceMasDeMediaHoraException();
+			}
+			if (Duration.between(vehiculo.getHoraIngreso(), LocalDateTime.now()).toMinutes() > 30)
+				vehiculosOrdenadosQueSuperanLaMediaHoraTiempoMayorAMenor.add(vehiculo);
+		}
+		return vehiculosOrdenadosQueSuperanLaMediaHoraTiempoMayorAMenor;
 	}
 
 }

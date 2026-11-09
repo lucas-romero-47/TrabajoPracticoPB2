@@ -7,7 +7,7 @@ import ar.edu.unlam.pb2.enums.MarcaEnum;
 import ar.edu.unlam.pb2.exceptions.CascoAsignadoException;
 import ar.edu.unlam.pb2.exceptions.DebeTenerCascoParaPoderCalcularSuCostoDeSalidaException;
 
-public abstract class Vehiculo {
+public abstract class Vehiculo implements Comparable<Vehiculo> {
 
 	private String patente;
 	private MarcaEnum marca;
@@ -20,7 +20,7 @@ public abstract class Vehiculo {
 		this.horaIngreso = horaIngreso;
 		this.horaSalida = null;
 	}
-	
+
 	public String getPatente() {
 		return patente;
 	}
@@ -52,6 +52,7 @@ public abstract class Vehiculo {
 		return Objects.equals(patente, other.patente);
 	}
 
-	public abstract Double calcularCosto(LocalDateTime horaDeSalida) throws DebeTenerCascoParaPoderCalcularSuCostoDeSalidaException;
-	
+	public abstract Double calcularCosto(LocalDateTime horaDeSalida)
+			throws DebeTenerCascoParaPoderCalcularSuCostoDeSalidaException;
+
 }
